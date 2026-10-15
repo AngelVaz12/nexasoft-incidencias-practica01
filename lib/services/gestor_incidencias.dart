@@ -36,6 +36,8 @@ class GestorIncidencias {
         break;
       }
     }
+    // BUG-001: el cambio solo se hacia en memoria; se guarda en el almacenamiento local
+    await datos.guardar(incidencias);
   }
 
   Future<void> crear(String titulo, String descripcion, String cliente,
