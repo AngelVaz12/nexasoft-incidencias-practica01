@@ -87,15 +87,31 @@ void main() {
     // BUG-002: busquedas
     await tester.enterText(find.byType(TextField), 'wifi');
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     await foto('05_busqueda_wifi');
     await tester.enterText(find.byType(TextField), 'WiFi');
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     await foto('06_busqueda_WiFi');
     await tester.enterText(find.byType(TextField), 'túnel');
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     await foto('07_busqueda_tunel');
     await tester.enterText(find.byType(TextField), '');
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // BUG-003 (viceversa): INC-104 de Resuelta a Pendiente
+    await tester.tap(find.text('No llegan correos de confirmación'));
+    await esperar();
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Pendiente').last);
+    await esperar();
+    await tester.pageBack();
+    await esperar();
+    await foto('07b_INC-104_a_pendiente');
 
     // Registro nuevo y segundo reinicio
     await tester.tap(find.text('Nueva incidencia'));
