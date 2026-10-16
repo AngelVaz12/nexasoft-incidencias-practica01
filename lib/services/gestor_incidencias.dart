@@ -12,9 +12,16 @@ class GestorIncidencias {
         incidencias.where((x) => x.estado == 'Pendiente').length;
   }
 
+  // BUG-002: la consulta se limpia (trim) y se compara sin distinguir
+  // mayusculas/minusculas contra el titulo y la descripcion.
   List<Incidencia> buscar(String texto) {
-    if (texto.trim().isEmpty) return incidencias;
-    return incidencias.where((x) => x.titulo.contains(texto)).toList();
+    final consulta = texto.trim().toLowerCase();
+    if (consulta.isEmpty) return List.of(incidencias);
+    return incidencias
+        .where((x) =>
+            x.titulo.toLowerCase().contains(consulta) ||
+            x.descripcion.toLowerCase().contains(consulta))
+        .toList();
   }
 
   Incidencia? porId(String id) {
