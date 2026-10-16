@@ -4,12 +4,9 @@ import '../model/incidencia.dart';
 class GestorIncidencias {
   final AlmacenLocal datos = AlmacenLocal();
   List<Incidencia> incidencias = [];
-  int cantidadPendientes = 0;
 
   Future<void> iniciar() async {
     incidencias = await datos.leer();
-    cantidadPendientes =
-        incidencias.where((x) => x.estado == 'Pendiente').length;
   }
 
   // BUG-002: la consulta se limpia (trim) y se compara sin distinguir
@@ -31,8 +28,10 @@ class GestorIncidencias {
     return null;
   }
 
+  // BUG-003: todos los totales se calculan al momento sobre la lista completa
+  // (no sobre la busqueda); antes Pendientes era un valor guardado aparte que
+  // no se actualizaba al cambiar un estado.
   int contar(String estado) {
-    if (estado == 'Pendiente') return cantidadPendientes;
     return incidencias.where((x) => x.estado == estado).length;
   }
 
@@ -59,7 +58,6 @@ class GestorIncidencias {
       fecha: DateTime.now().toIso8601String().split('T').first,
     );
     incidencias.insert(0, nuevo);
-    cantidadPendientes++;
     await datos.guardar(incidencias);
   }
 
