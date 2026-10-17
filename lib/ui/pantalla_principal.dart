@@ -16,6 +16,28 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
   bool cargando = true;
   String? error;
   String busqueda = '';
+  // FEAT-002: filtros combinables
+  final busquedaCtrl = TextEditingController();
+  String filtroEstado = 'Todos';
+  String filtroPrioridad = 'Todas';
+
+  bool get hayFiltros =>
+      busqueda.trim().isNotEmpty || filtroEstado != 'Todos' || filtroPrioridad != 'Todas';
+
+  void limpiarFiltros() {
+    busquedaCtrl.clear();
+    setState(() {
+      busqueda = '';
+      filtroEstado = 'Todos';
+      filtroPrioridad = 'Todas';
+    });
+  }
+
+  @override
+  void dispose() {
+    busquedaCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -90,7 +112,7 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
 
   @override
   Widget build(BuildContext context) {
-    final items = g.buscar(busqueda);
+    final items = g.consultar(texto: busqueda, estado: filtroEstado, prioridad: filtroPrioridad);
     return Scaffold(
       appBar: AppBar(
         title: const Text('NexaSoft | Incidencias'),
@@ -157,6 +179,7 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
                           child: TextField(
+                            controller: busquedaCtrl,
                             decoration: const InputDecoration(
                               labelText: 'Buscar incidencias',
                               hintText: 'Ejemplo: WiFi, correo, pantalla',
@@ -167,15 +190,72 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                           ),
                         ),
                         Padding(
+                          padding: const EdgeInsets.fromLTRB(17, 8, 17, 2),
+                          child: Row(children: [
+                            Expanded(
+                              child: KeyedSubtree(
+                                key: const Key('filtro-estado'),
+                                child: DropdownButtonFormField<String>(
+                                  key: ValueKey('filtro-estado-$filtroEstado'),
+                                  initialValue: filtroEstado,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Estado', border: OutlineInputBorder(), isDense: true),
+                                  isExpanded: true,
+                                  items: GestorIncidencias.filtrosEstado
+                                      .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                                      .toList(),
+                                  onChanged: (v) => setState(() => filtroEstado = v ?? 'Todos'),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: KeyedSubtree(
+                                key: const Key('filtro-prioridad'),
+                                child: DropdownButtonFormField<String>(
+                                  key: ValueKey('filtro-prioridad-$filtroPrioridad'),
+                                  initialValue: filtroPrioridad,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Prioridad', border: OutlineInputBorder(), isDense: true),
+                                  isExpanded: true,
+                                  items: GestorIncidencias.filtrosPrioridad
+                                      .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                                      .toList(),
+                                  onChanged: (v) => setState(() => filtroPrioridad = v ?? 'Todas'),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            TextButton.icon(
+                              onPressed: hayFiltros ? limpiarFiltros : null,
+                              icon: const Icon(Icons.filter_alt_off_outlined),
+                              label: const Text('Limpiar filtros'),
+                            ),
+                          ]),
+                        ),
+                        Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                           child: Align(
                             alignment: Alignment.centerLeft,
-                            child: Text('${items.length} registros', style: const TextStyle(color: Colors.black54)),
+                            child: Text('${items.length} de ${g.incidencias.length} registros', style: const TextStyle(color: Colors.black54)),
                           ),
                         ),
                         Expanded(
                           child: items.isEmpty
-                              ? const Center(child: Text('No se encontraron incidencias'))
+                              ? Center(
+                                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                    const Icon(Icons.search_off, size: 40, color: Colors.black45),
+                                    const SizedBox(height: 8),
+                                    const Text('Ninguna incidencia cumple la búsqueda y los filtros.',
+                                        textAlign: TextAlign.center),
+                                    const SizedBox(height: 12),
+                                    FilledButton.tonalIcon(
+                                      onPressed: limpiarFiltros,
+                                      icon: const Icon(Icons.filter_alt_off_outlined),
+                                      label: const Text('Mostrar todas'),
+                                    ),
+                                  ]),
+                                )
                               : ListView.builder(
                                   padding: const EdgeInsets.only(left: 12, right: 12, bottom: 100),
                                   itemCount: items.length,
