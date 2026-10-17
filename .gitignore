@@ -14,3 +14,4 @@ android/key.properties
 
 # capturas generadas por las pruebas
 test/evidencias/
+test/failures/
