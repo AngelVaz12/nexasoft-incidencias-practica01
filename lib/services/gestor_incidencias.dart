@@ -21,6 +21,24 @@ class GestorIncidencias {
         .toList();
   }
 
+  // FEAT-002: opciones de los filtros de la pantalla principal
+  static const List<String> filtrosEstado = ['Todos', 'Pendiente', 'En proceso', 'Resuelta'];
+  static const List<String> filtrosPrioridad = ['Todas', 'Baja', 'Media', 'Alta'];
+
+  // FEAT-002: texto, estado y prioridad se aplican juntos (todas las
+  // condiciones activas). 'Todos' / 'Todas' significa sin filtro.
+  List<Incidencia> consultar({
+    String texto = '',
+    String estado = 'Todos',
+    String prioridad = 'Todas',
+  }) {
+    return buscar(texto)
+        .where((x) =>
+            (estado == 'Todos' || x.estado == estado) &&
+            (prioridad == 'Todas' || x.prioridad == prioridad))
+        .toList();
+  }
+
   Incidencia? porId(String id) {
     for (var x in incidencias) {
       if (x.id == id) return x;
