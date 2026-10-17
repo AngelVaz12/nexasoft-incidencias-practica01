@@ -1,3 +1,14 @@
+/// Prioridades aprobadas por el cliente (FEAT-001).
+const List<String> prioridadesValidas = ['Baja', 'Media', 'Alta'];
+const String prioridadPorDefecto = 'Media';
+
+/// Devuelve una prioridad aprobada. Registros antiguos sin prioridad o con un
+/// valor no aprobado se abren con 'Media' en lugar de fallar.
+String normalizarPrioridad(Object? valor) {
+  final texto = valor?.toString();
+  return prioridadesValidas.contains(texto) ? texto! : prioridadPorDefecto;
+}
+
 class Incidencia {
   String id;
   String titulo;
@@ -6,6 +17,7 @@ class Incidencia {
   String categoria;
   String estado;
   String fecha;
+  String prioridad;
 
   Incidencia({
     required this.id,
@@ -15,7 +27,8 @@ class Incidencia {
     required this.categoria,
     required this.estado,
     required this.fecha,
-  });
+    String prioridad = prioridadPorDefecto,
+  }) : prioridad = normalizarPrioridad(prioridad);
 
   factory Incidencia.desdeJson(Map<String, dynamic> m) {
     return Incidencia(
@@ -26,6 +39,7 @@ class Incidencia {
       categoria: m['categoria']?.toString() ?? 'Software',
       estado: m['estado']?.toString() ?? 'Pendiente',
       fecha: m['fecha']?.toString() ?? '',
+      prioridad: normalizarPrioridad(m['prioridad']),
     );
   }
 
@@ -38,6 +52,7 @@ class Incidencia {
       'categoria': categoria,
       'estado': estado,
       'fecha': fecha,
+      'prioridad': prioridad,
     };
   }
 }
