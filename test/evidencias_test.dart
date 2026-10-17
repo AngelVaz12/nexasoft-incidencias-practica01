@@ -10,6 +10,9 @@ import 'package:shared_preferences_platform_interface/in_memory_shared_preferenc
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 const fase = String.fromEnvironment('FASE', defaultValue: 'antes');
+// Solo genera capturas cuando se indica --dart-define=FASE=...; en la
+// regresion normal (flutter test) se omite para no comparar contra capturas viejas.
+const generarCapturas = bool.hasEnvironment('FASE');
 
 Future<void> cargarFuente(String familia, List<String> rutas) async {
   final loader = FontLoader(familia);
@@ -71,7 +74,7 @@ void main() {
     // BUG-001 / BUG-003: INC-101 de Pendiente a Resuelta
     await tester.tap(find.text('Impresora del almacén no responde'));
     await esperar();
-    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Resuelta').last);
@@ -104,7 +107,7 @@ void main() {
     // BUG-003 (viceversa): INC-104 de Resuelta a Pendiente
     await tester.tap(find.text('No llegan correos de confirmación'));
     await esperar();
-    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Pendiente').last);
@@ -126,5 +129,5 @@ void main() {
 
     await abrirApp();
     await foto('09_tras_segundo_reinicio');
-  });
+  }, skip: !generarCapturas);
 }

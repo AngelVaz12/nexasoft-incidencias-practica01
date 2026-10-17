@@ -46,8 +46,23 @@ class GestorIncidencias {
     await datos.guardar(incidencias);
   }
 
+  // FEAT-001: cambia la prioridad de una incidencia y la guarda.
+  // Solo se aceptan los valores aprobados (Baja, Media, Alta).
+  Future<void> cambiarPrioridad(String id, String prioridad) async {
+    if (!prioridadesValidas.contains(prioridad)) {
+      throw ArgumentError('Prioridad no permitida: $prioridad');
+    }
+    final item = porId(id);
+    if (item == null) return;
+    item.prioridad = prioridad;
+    await datos.guardar(incidencias);
+  }
+
   Future<void> crear(String titulo, String descripcion, String cliente,
-      String categoria) async {
+      String categoria, {String prioridad = prioridadPorDefecto}) async {
+    if (!prioridadesValidas.contains(prioridad)) {
+      throw ArgumentError('Prioridad no permitida: $prioridad');
+    }
     final nuevo = Incidencia(
       id: 'INC-${DateTime.now().microsecondsSinceEpoch}',
       titulo: titulo,
@@ -56,6 +71,7 @@ class GestorIncidencias {
       categoria: categoria,
       estado: 'Pendiente',
       fecha: DateTime.now().toIso8601String().split('T').first,
+      prioridad: prioridad,
     );
     incidencias.insert(0, nuevo);
     await datos.guardar(incidencias);
